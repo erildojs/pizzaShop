@@ -1,5 +1,5 @@
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export function OrderDetails() {
   return (
@@ -48,6 +48,37 @@ export function OrderDetails() {
               </TableCell>
             </TableRow>
           </TableBody>
+        </Table>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Produto</TableHead>
+              <TableHead className="text-right">Qtd.</TableHead>
+              <TableHead className="text-right">Preço</TableHead>
+              <TableHead className="text-right">Subtotal</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell>Pizza calabreza</TableCell>
+              <TableCell className="text-right">2</TableCell>
+              <TableCell className="text-right">Kz 5000</TableCell>
+              <TableCell className="text-right">Kz 10.000</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Pizza pepperoni</TableCell>
+              <TableCell className="text-right">2</TableCell>
+              <TableCell className="text-right">Kz 4.500</TableCell>
+              <TableCell className="text-right">Kz 9.000</TableCell>
+            </TableRow>
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={3}>Total do pedido</TableCell>
+              <TableCell colSpan={3} className="text-right font-medium">Kz 19.000</TableCell>
+            </TableRow>
+          </TableFooter>
         </Table>
       </div>
     </DialogContent>
