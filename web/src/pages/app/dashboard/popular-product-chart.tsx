@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import colors from "tailwindcss/colors"
-import {PieChart, Pie, ResponsiveContainer, Cell} from "recharts"
+import { PieChart, Pie, ResponsiveContainer, Cell } from "recharts"
 import { BarChart } from "lucide-react";
 
 const COLORS = [
@@ -19,18 +19,21 @@ export function PopularProductChart() {
           <CardTitle className="text-base font-medium">
             Produtos populares
           </CardTitle>
-          <BarChart className="h-4 w-4 text-muted-foreground"/>
+          <BarChart className="h-4 w-4 text-muted-foreground" />
         </div>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={240}>
-          <PieChart style={{fontSize: 12}}>
-            <Pie data={} dataKey="amount" nameKey="product" cx="50%" cy="50%" outerRadius={86} innerRadius={64} strokeWidth={8}
+          <PieChart style={{ fontSize: 12 }}>
+            {/**
+             * <Pie data={} dataKey="amount" nameKey="product" cx="50%" cy="50%" outerRadius={86} innerRadius={64} strokeWidth={8}
             labelLine={false}
             
             >
               <Cell key="cell-" fill={COLORS[]} className="stroke-background hover:opacity-80"/>
             </Pie>
+             */}
+
           </PieChart>
         </ResponsiveContainer>
       </CardContent>
