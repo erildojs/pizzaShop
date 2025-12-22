@@ -52,6 +52,7 @@ sendAuthenticationLink.post('/authenticate', async (req, res, next) => {
             text: `Use the following link to authenticate on pizza shop: ${authLink.toString()}`
         })
         console.log(nodemailer.getTestMessageUrl(emailSendInfo))
+        console.log(authLink.toString())
 
         return res.status(200).send()
     } catch (err) {

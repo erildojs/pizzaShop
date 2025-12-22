@@ -12,7 +12,7 @@ export const app = express()
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
-    origin: env.API_BASE_URL,
+    origin: env.AUTH_REDIRECT_URL,
     credentials: true,
 }))
 

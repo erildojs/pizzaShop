@@ -36,6 +36,9 @@ registerRestaurant.post('/restaurants', async (req, res, next) => {
                     managerId: manager.id,
                 },
             })
+        }, {
+            maxWait: 5000,
+            timeout: 10000,
         })
 
         return res.status(204).send()
