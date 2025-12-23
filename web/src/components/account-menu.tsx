@@ -11,12 +11,15 @@ import { StoreProfileDialog } from "./store-profile-dialog";
 export function AccontMenu() {
   const { data: profile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ['profile'],
-    queryFn: getProfile
+    queryFn: getProfile,
+    staleTime: Infinity //disabilita a opçao de dar um fetch quando der
+    //um focus na tela
   })//useQuery para operaçoes de busca
 
   const { data: managedRestaurant, isLoading: isLoadingManagedRestaurant } = useQuery({
     queryKey: ['managed-restaurant'],
-    queryFn: getManagedRestaurant
+    queryFn: getManagedRestaurant,
+    staleTime: Infinity
   })//useQuery para operaçoes de busca
 
   return (

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -11,6 +5,100 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id                String       @id @default(cuid())
+  name              String
+  email             String       @unique
+  phone             String?
+  role              UserRole     @default(customer)
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+  authLinks         AuthLink[]
+  evaluations       Evaluation[] @relation("CustomerEvaluations")
+  orders            Order[]
+  managedRestaurant Restaurant?  @relation("RestaurantManager")
+
+  @@map("users")
+}
+
+model Restaurant {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  managerId   String?      @unique @map("manager_id")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  evaluations Evaluation[]
+  orders      Order[]
+  products    Product[]
+  manager     User?        @relation("RestaurantManager", fields: [managerId], references: [id])
+
+  @@map("restaurants")
+}
+
+model Product {
+  id           String      @id @default(cuid())
+  name         String
+  description  String?
+  priceInCents Int         @map("price_in_cents")
+  restaurantId String      @map("restaurant_id")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  orderItems   OrderItem[]
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@map("products")
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  customerId   String?     @map("customer_id")
+  restaurantId String      @map("restaurant_id")
+  status       OrderStatus @default(pending)
+  totalInCents Int         @map("total_in_cents")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  orderItems   OrderItem[]
+  customer     User?       @relation(fields: [customerId], references: [id])
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String   @map("order_id")
+  productId    String?  @map("product_id")
+  quantity     Int      @default(1)
+  priceInCents Int      @map("price_in_cents")
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product? @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Evaluation {
+  id           String     @id @default(cuid())
+  customerId   String     @map("customer_id")
+  restaurantId String     @map("restaurant_id")
+  rate         Int
+  comment      String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  customer     User       @relation("CustomerEvaluations", fields: [customerId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@map("evaluations")
+}
+
+model AuthLink {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("auth_links")
 }
 
 enum UserRole {
@@ -24,105 +112,4 @@ enum OrderStatus {
   processing
   delivering
   delivered
-}
-
-model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  phone     String?
-  role      UserRole @default(customer)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  orders            Order[]
-  managedRestaurant Restaurant? @relation("RestaurantManager")
-  authLinks         AuthLink[]
-  evaluations       Evaluation[] @relation("CustomerEvaluations")
-
-  @@map("users")
-}
-
-model Restaurant {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  managerId   String?  @unique @map("manager_id")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  manager     User?        @relation("RestaurantManager", fields: [managerId], references: [id])
-  orders      Order[]
-  products    Product[]
-  evaluations Evaluation[]
-
-  @@map("restaurants")
-}
-
-model Product {
-  id           String      @id @default(cuid())
-  name         String
-  description  String?
-  priceInCents Int         @map("price_in_cents")
-  restaurantId String      @map("restaurant_id")
-  createdAt    DateTime    @default(now()) @map("created_at")
-  updatedAt    DateTime    @updatedAt @map("updated_at")
-
-  restaurant Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  orderItems OrderItem[]
-
-  @@map("products")
-}
-
-model Order {
-  id           String      @id @default(cuid())
-  customerId   String?     @map("customer_id")
-  restaurantId String      @map("restaurant_id")
-  status       OrderStatus @default(pending)
-  totalInCents Int         @map("total_in_cents")
-  createdAt    DateTime    @default(now()) @map("created_at")
-
-  customer   User?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  restaurant Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: SetNull)
-  orderItems OrderItem[]
-
-  @@map("orders")
-}
-
-model OrderItem {
-  id           String  @id @default(cuid())
-  orderId      String  @map("order_id")
-  productId    String? @map("product_id")
-  quantity     Int     @default(1)
-  priceInCents Int     @map("price_in_cents")
-
-  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
-
-  @@map("order_items")
-}
-
-model Evaluation {
-  id           String   @id @default(cuid())
-  customerId   String   @map("customer_id")
-  restaurantId String   @map("restaurant_id")
-  rate         Int
-  comment      String?
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  customer   User       @relation("CustomerEvaluations", fields: [customerId], references: [id])
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-
-  @@map("evaluations")
-}
-
-model AuthLink {
-  id        String   @id @default(cuid())
-  code      String   @unique
-  userId    String   @map("user_id")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@map("auth_links")
 }
