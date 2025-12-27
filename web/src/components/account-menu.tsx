@@ -45,7 +45,7 @@ export function AccontMenu() {
             )}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DialogTrigger>
+          <DialogTrigger asChild>
             <DropdownMenuItem>
               <Building className="w-4 h-4 mr-2" />
               <span>Perfil da loja</span>
