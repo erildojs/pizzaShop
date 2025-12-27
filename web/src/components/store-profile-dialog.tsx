@@ -1,10 +1,10 @@
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { DialogContent, DialogDescription, DialogFooter, DialogHeader } from "./ui/dialog";
+import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getManagedRestaurant } from "@/api/get-managed-restaurant";
 import { z } from "zod"
 import { useForm } from "react-hook-form";
@@ -20,6 +20,7 @@ const storeProfileSchema = z.object({
 type StoreProfileSchema = z.infer<typeof storeProfileSchema>
 
 export function StoreProfileDialog() {
+  const queryClient = useQueryClient()
   const { data: managedRestaurant } = useQuery({
     queryKey: ['managed-restaurant'],
     queryFn: getManagedRestaurant,
@@ -33,7 +34,17 @@ export function StoreProfileDialog() {
     }
   })
   const { mutateAsync: updateProfileFn } = useMutation({
-    mutationFn: updateProfile
+    mutationFn: updateProfile,
+    onSuccess: (_, { name, description }) => {//funcao usada quando queremos actualizar os dados da tela (http state)
+      const cashed = queryClient.getQueryData(['managed-restaurant'])
+      if (cashed) {
+        queryClient.setQueryData(['managed-restaurant'], {
+          ...cashed,
+          name,
+          description,
+        })
+      }
+    }
   })
   async function handleUpdateProfile(data: StoreProfileSchema) {
     try {
@@ -65,7 +76,9 @@ export function StoreProfileDialog() {
           </div>
         </div>
         <DialogFooter>
-          <Button type="button" variant="ghost" className="bg-red-600">Cancelar</Button>
+          <DialogClose asChild>
+            <Button type="button" variant="ghost" className="bg-red-600">Cancelar</Button>
+          </DialogClose>
           <Button type="submit" variant="success" disabled={isSubmitting}>Salvar</Button>
         </DialogFooter>
       </form>
