@@ -5,7 +5,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getManagedRestaurant } from "@/api/get-managed-restaurant";
+import { getManagedRestaurant, type GetManagedRestaurantResponse } from "@/api/get-managed-restaurant";
 import { z } from "zod"
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 const storeProfileSchema = z.object({
   name: z.string().min(1),
-  description: z.string()
+  description: z.string().nullable()
 })
 
 type StoreProfileSchema = z.infer<typeof storeProfileSchema>
@@ -33,18 +33,30 @@ export function StoreProfileDialog() {
       description: managedRestaurant?.description ?? ''
     }
   })
+  function updateManagedRestaurantCache({ name, description }: StoreProfileSchema) {
+    const cashed = queryClient.getQueryData<GetManagedRestaurantResponse>(['managed-restaurant'])
+    if (cashed) {
+      queryClient.setQueryData<GetManagedRestaurantResponse>(['managed-restaurant'], {
+        ...cashed,
+        name,
+        description,
+      })
+    }
+    return { cashed }
+  }
   const { mutateAsync: updateProfileFn } = useMutation({
     mutationFn: updateProfile,
-    onSuccess: (_, { name, description }) => {//funcao usada quando queremos actualizar os dados da tela (http state)
-      const cashed = queryClient.getQueryData(['managed-restaurant'])
-      if (cashed) {
-        queryClient.setQueryData(['managed-restaurant'], {
-          ...cashed,
-          name,
-          description,
-        })
+    onMutate: ({ name, description }) => {
+      //onSuccess - funcao usada quando queremos actualizar os dados da tela (http state)
+      //onMutate - funcao que dispara no clico do botao
+      const { cashed } = updateManagedRestaurantCache({ name, description })
+      return { previousProfile: cashed }
+    },
+    onError(_, __, context) {
+      if (context?.previousProfile) {
+        updateManagedRestaurantCache(context.previousProfile)
       }
-    }
+    },
   })
   async function handleUpdateProfile(data: StoreProfileSchema) {
     try {
@@ -52,6 +64,9 @@ export function StoreProfileDialog() {
         name: data.name,
         description: data.description
       })
+      //interface otimista - é quando eu reago a alguma alteraçao do user mesmo antes 
+      //da alteraçao actualizar no banco.
+
       toast.success('Perfil actualizado com sucesso!')
     } catch (error) {
       toast.error('Falha ao actualizar o perfil, tente novamente.')
