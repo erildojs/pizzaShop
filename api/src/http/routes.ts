@@ -8,6 +8,7 @@ import { getManagedRestaurant } from './routes/get-managed-restaurant.js'
 import { createOrder } from './routes/create-order.js'
 import { signOutRoute } from './routes/sign-out.js'
 import { updateProfile } from './routes/update-profile.js'
+import { getOrders } from './routes/get-orders.js'
 
 export const routes = Router()
 
@@ -20,3 +21,4 @@ routes.use(getManagedRestaurant)
 routes.use(createOrder)
 routes.use(signOutRoute)
 routes.use(updateProfile)
+routes.use(getOrders)
