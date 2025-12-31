@@ -9,6 +9,7 @@ import { createOrder } from './routes/create-order.js'
 import { signOutRoute } from './routes/sign-out.js'
 import { updateProfile } from './routes/update-profile.js'
 import { getOrders } from './routes/get-orders.js'
+import { getOrderDetails } from './routes/get-order-details.js'
 
 export const routes = Router()
 
@@ -22,3 +23,4 @@ routes.use(createOrder)
 routes.use(signOutRoute)
 routes.use(updateProfile)
 routes.use(getOrders)
+routes.use(getOrderDetails)
